@@ -7,7 +7,6 @@ networkx==2.3
 numpy==1.16.2
 opencv-python==4.1.0.25
 Pillow==6.0.0
-py2app==0.19
 PyWavelets==1.0.3
 scikit-image==0.15.0
 scipy==1.2.1
