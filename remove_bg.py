@@ -7,7 +7,7 @@ import numpy as np
 
 def remove_bg(img):
     #== Parameters =======================================================================
-    BLUR = 21
+    BLUR = 19
     CANNY_THRESH_1 = 10
     CANNY_THRESH_2 = 200
     MASK_DILATE_ITER = 10
@@ -22,17 +22,13 @@ def remove_bg(img):
     try:
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     except:
-        img_255 = img * 255
-        gray = cv2.cvtColor(img_255.astype(np.uint8),cv2.COLOR_BGR2GRAY)
+        img = img * 255
+        gray = cv2.cvtColor(img.astype('uint8'),cv2.COLOR_BGR2GRAY)
     
-
     #-- Edge detection -------------------------------------------------------------------
     edges = cv2.Canny(gray, CANNY_THRESH_1, CANNY_THRESH_2)
     edges = cv2.dilate(edges, None)
     edges = cv2.erode(edges, None)
-
-
-
 
     #-- Find contours in edges, sort by area ---------------------------------------------
     contour_info = []
@@ -48,12 +44,12 @@ def remove_bg(img):
         ))
 
     contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
-    max_contour = contour_info[0]
 
     #-- Create empty mask, draw filled polygon on it corresponding to largest contour ----
     # Mask is black, polygon is white
     mask = np.zeros(edges.shape)
-    cv2.fillConvexPoly(mask, max_contour[0], (255))
+    for i in range(len(contour_info)):
+        cv2.fillConvexPoly(mask, contour_info[i][0], (255))
 
     #-- Smooth mask, then blur it --------------------------------------------------------
     mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
