@@ -6,7 +6,8 @@ import cv2
 import numpy as np
 
 def remove_bg(img):
-    #== Parameters =======================================================================
+    # Setting up parameters
+    print('Setting up parameters...')
     BLUR = 19
     CANNY_THRESH_1 = 10
     CANNY_THRESH_2 = 200
@@ -14,28 +15,24 @@ def remove_bg(img):
     MASK_ERODE_ITER = 10
     MASK_COLOR = (0.0, 0.0, 0.0) # In BGR format
 
-
-    #== Processing =======================================================================
-
-    #-- Read image -----------------------------------------------------------------------
-
+    # Reading image
+    print('Reading image...')
     try:
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     except:
         img = img * 255
         gray = cv2.cvtColor(img.astype('uint8'),cv2.COLOR_BGR2GRAY)
     
-    #-- Edge detection -------------------------------------------------------------------
+    # Detecting edges
+    print('Detecting edges...')
     edges = cv2.Canny(gray, CANNY_THRESH_1, CANNY_THRESH_2)
     edges = cv2.dilate(edges, None)
     edges = cv2.erode(edges, None)
 
-    #-- Find contours in edges, sort by area ---------------------------------------------
+    # Find contours
+    print('Creating contours...')
     contour_info = []
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    # Previously, for a previous version of cv2, this line was: 
-    #  contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    # Thanks to notes from commenters, I've updated the code but left this note
     for c in contours:
         contour_info.append((
             c,
@@ -43,21 +40,22 @@ def remove_bg(img):
             cv2.contourArea(c),
         ))
 
-    contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
 
-    #-- Create empty mask, draw filled polygon on it corresponding to largest contour ----
-    # Mask is black, polygon is white
+    # Creating and filling mask
+    print('Setting up mask...')
     mask = np.zeros(edges.shape)
     for i in range(len(contour_info)):
         cv2.fillConvexPoly(mask, contour_info[i][0], (255))
 
-    #-- Smooth mask, then blur it --------------------------------------------------------
+    # Smoothing and blurring mask
+    print('Smoothing and blurring mask...')
     mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
     mask = cv2.erode(mask, None, iterations=MASK_ERODE_ITER)
     mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
     mask_stack = np.dstack([mask]*3)    # Create 3-channel alpha mask
 
-    #-- Blend masked img into MASK_COLOR background --------------------------------------
+    # Blending mask into background
+    print('Blending mask into background...')
     mask_stack  = mask_stack.astype('float32') / 255.0          # Use float matrices, 
     img         = img.astype('float32') / 255.0                 #  for easy blending
 
