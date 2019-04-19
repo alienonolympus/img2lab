@@ -1,4 +1,5 @@
 # SOURCED FROM jedwards ANSWER ON STACKOVERFLOW
+# The code has been edited in order to suit this application better
 # https://stackoverflow.com/questions/29313667/how-do-i-remove-the-background-from-this-kind-of-image
 
 import cv2
@@ -11,19 +12,27 @@ def remove_bg(img):
     CANNY_THRESH_2 = 200
     MASK_DILATE_ITER = 10
     MASK_ERODE_ITER = 10
-    MASK_COLOR = (0.0,0.0,1.0) # In BGR format
+    MASK_COLOR = (0.0, 0.0, 0.0) # In BGR format
 
 
     #== Processing =======================================================================
 
     #-- Read image -----------------------------------------------------------------------
 
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    try:
+        gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    except:
+        img_255 = img * 255
+        gray = cv2.cvtColor(img_255.astype(np.uint8),cv2.COLOR_BGR2GRAY)
+    
 
     #-- Edge detection -------------------------------------------------------------------
     edges = cv2.Canny(gray, CANNY_THRESH_1, CANNY_THRESH_2)
     edges = cv2.dilate(edges, None)
     edges = cv2.erode(edges, None)
+
+
+
 
     #-- Find contours in edges, sort by area ---------------------------------------------
     contour_info = []
@@ -37,6 +46,7 @@ def remove_bg(img):
             cv2.isContourConvex(c),
             cv2.contourArea(c),
         ))
+
     contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
     max_contour = contour_info[0]
 
