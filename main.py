@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, messagebox, filedialog, Checkbutton, BooleanVar, Frame
+from tkinter import Tk, Label, Button, messagebox, filedialog, Checkbutton, BooleanVar, Frame, Entry, StringVar
 import numpy as np
 from skimage import io
 from skimage.color import rgb2lab, rgba2rgb
@@ -19,21 +19,24 @@ from remove_bg import remove_bg
 print('Creating tkinter window...')
 window = Tk()
 window.title('CIELAB Values Calculator - img2lab')
-window.attributes('-fullscreen', True)
-window.configure(background='#ffffff')
-
 screen_width, screen_height = window.winfo_screenwidth(), window.winfo_screenheight()
-img_size = (int(screen_width / 3.5), int(screen_width / 3.5))
+#window.attributes('-fullscreen', True)
+window.geometry("%dx%d" % (screen_width * 0.8, screen_height * 0.8))
+window.configure(background='#ffffff')
+window.update()
+#img_size = (int(screen_width / 3.5), int(screen_width / 3.5))
+img_size = (int(window.winfo_width() / 3.5), int(window.winfo_height() / 3.5))
+
 
 # Configuring grid
 print('Configuring tkinter grids...')
 window.grid_rowconfigure(0, weight = 3)
 window.grid_rowconfigure(1, weight = 2)
-for row in range(2, 6):
+for row in range(2, 9):
     window.grid_rowconfigure(row, weight = 1)
-window.grid_columnconfigure(0, weight = 2)
-window.grid_columnconfigure(1, weight = 2)
-window.grid_columnconfigure(2, weight = 1)
+window.grid_columnconfigure(0, weight = 3)
+window.grid_columnconfigure(1, weight = 3)
+window.grid_columnconfigure(2, weight = 2)
 
 # Labels
 print('Creating labels...')
@@ -45,6 +48,16 @@ lbl_chosen.grid(row = 1, column = 0)
 lbl_processed = Label(window, text = 'Processed image', background = '#ffffff', foreground = '#000000', font = ('Calibri', 18))
 lbl_processed.grid(row = 1, column = 1)
 
+lbl_status = Label(window, text = 'Status:', background = '#ffffff', foreground = '#000000', font = ('Calibri', 11))
+lbl_status.grid(row = 1, column = 2)
+
+def update_status(msg):
+    print(msg)
+    lbl_status.configure(text = 'Status:\n' + msg)
+    window.update()
+
+update_status('Ready.')
+
 # Setting up images
 print('Setting up images...')
 img_chosen = Label(window, image = render_image(path = 'placeholder.png'), background = '#ffffff')
@@ -54,8 +67,32 @@ img_processed.grid(row = 2, column = 1, rowspan = 6)
 
 # LAB labels
 print('Creating LAB labels...')
-lbl_lab = Label(window, text = 'L* = 0\na* = 0\nb* = 0', background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
-lbl_lab.grid(row = 4, column = 2)
+string_l = StringVar()
+string_a = StringVar()
+string_b = StringVar()
+string_browning = StringVar()
+entry_l = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_l)
+entry_l.grid(row = 4, column = 2)
+entry_a = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_a)
+entry_a.grid(row = 5, column = 2)
+entry_b = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_b)
+entry_b.grid(row = 6, column = 2)
+entry_browning = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_browning)
+entry_browning.grid(row = 7, column = 2)
+
+def set_lab_values(lab):
+    string_l.set('L* = ' + str(lab[0]))
+    string_a.set('a* = ' + str(lab[1]))
+    string_b.set('b* = ' + str(lab[2]))
+    try:
+        x = (lab[1] + 1.75 * lab[0]) / (5.645 * lab[0] + lab[1] - 0.3012 * lab[2])
+        browning = (100 * (x - 0.31)) / 0.17
+    except ZeroDivisionError:
+        browning = 0
+    string_browning.set('Browning Index = ' + str(browning))
+    window.update()
+
+set_lab_values([0.0, 0.0, 0.0])
 
 # Creating buttons
 print('Creating buttons...')
@@ -67,17 +104,19 @@ check_remove_bg.toggle()
 
 def choose_file():
     # Asking for filename
-    print('Asking for filename')
+    update_status('Asking for filename...')
+    window.update()
     filename = filedialog.askopenfilename(initialdir = '~/Pictures')
     img = ''
     
     # Reading image
-    print('Reading file...')
+    update_status('Reading file...')
     try:
         img = io.imread(filename)
     except:
         if filename:
             messagebox.showinfo('Error', filename + 'Image file invalid.')
+        update_status('Ready.')
         return
     try:
         img = rgba2rgb(img)
@@ -85,56 +124,60 @@ def choose_file():
         pass
     
     # Rendering image
-    print('Rendering image...')
+    update_status('Rendering image...')
     chosen_img = render_image(path = filename)
     img_chosen.configure(image = chosen_img)
     img_chosen.image = chosen_img
+    window.update()
 
     if remove_img_bg.get():
         # Removing background
-        print('Removing background...')
+        update_status('Removing background...')
         masked = remove_bg(img)
 
         # Rendering image with removed background
-        print('Rendering image without background...')
+        update_status('Rendering image...')
         processed_img = render_image(image = Image.fromarray(masked))
         img_processed.configure(image = processed_img)
         img_processed.img = processed_img
+        window.update()
 
         # Converting to LAB
-        print('Converting RGB values to LAB values...')
+        update_status('Converting RGB to LAB...')
         lab = rgb2lab(masked)
     else:
         # Converting to LAB
-        print('Converting RGB values to LAB values...')
+        update_status('Converting RGB to LAB...')
         lab = rgb2lab(img)
         img_processed.configure(image = chosen_img)
         img_processed.image = chosen_img
 
     # Ignoring black pixels
-    print('Ignoring mask pixels...')
+    update_status('Ignoring mask pixels...')
     lab_array = lab.reshape(np.shape(lab)[0] * np.shape(lab)[1], np.shape(lab)[2])
     lab_no_black = [lab_value for lab_value in lab_array if lab_value[0] != 0.0]
 
     # Calculating values
-    print('Calculating values...')
+    update_status('Calculating values...')
     avg_lab = np.average(lab_no_black, axis=0)
 
     # Displaying values
-    print('Displaying values...')
-    lbl_lab.configure(text = 'L* = ' + str(avg_lab[0]) + '\na* = ' + str(avg_lab[1]) + '\nb* = ' + str(avg_lab[2]))
+    update_status('Displaying values...')
+    set_lab_values(avg_lab)
+    window.update()
 
-    print('Done.\n')
+    update_status('Ready.')
+    print()
 
 btn_submit = Button(window, text = 'Choose File', command = choose_file, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
 btn_submit.grid(row = 3, column = 2)
 
 def exit_img2lab():
-    print('Exiting img2lab...')
+    update_status('Exiting img2lab...')
     window.destroy()
 
 btn_exit = Button(window, text = 'Exit', command = exit_img2lab, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
-btn_exit.grid(row = 5, column = 2)
+btn_exit.grid(row = 8, column = 2)
 
 # Starting tkinter
 print('Starting tkinter...')
