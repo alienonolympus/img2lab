@@ -16,6 +16,8 @@ chmod a+x run.sh
 
 After running the commands above, the program can be accessed through opening run.sh with terminal or running the last command shown.
 
+Logs are stored in img2lab.log.
+
 ## Windows
 
 Make sure Python3 is installed.
