@@ -1,6 +1,6 @@
-# img2lab
+# img2lab [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2648170.svg)](https://doi.org/10.5281/zenodo.2648170)
 
-A simple tool to obtain the average L*, a* and b* values (based of CIELAB) of an image.
+A simple tool to obtain the average L*, a* and b* values (based on the CIELAB colour space) of an image. 
 
 # Installation and Usage
 
