@@ -4,6 +4,7 @@ from skimage import io
 from skimage.color import rgb2lab, rgba2rgb
 from os.path import abspath, join
 from PIL import Image, ImageTk, ImageChops
+from math import atan
 
 def render_image(path = '', image = 0):
     image_to_render = Image.new('1', img_size)
@@ -30,15 +31,14 @@ img_size = (int(window.winfo_width() / 3.5), int(window.winfo_height() / 3.5))
 print('Configuring tkinter grids...')
 window.grid_rowconfigure(0, weight = 3)
 window.grid_rowconfigure(1, weight = 2)
-for row in range(2, 9):
+for row in range(2, 10):
     window.grid_rowconfigure(row, weight = 1)
-window.grid_columnconfigure(0, weight = 3)
-window.grid_columnconfigure(1, weight = 3)
-window.grid_columnconfigure(2, weight = 2)
+for column in range(3):
+    window.grid_columnconfigure(column, weight = 1)
 
 # Labels
 print('Creating labels...')
-lbl_title = Label(window, text = '  Convert image to CIELAB values (L*, a* and b*)  ', background = '#ffffff', foreground = '#000000', font = ('Calibri', 36))
+lbl_title = Label(window, text = '  Convert image to CIELAB values (L*, a* and b*)  ', background = '#ffffff', foreground = '#000000', font = ('Calibri', 24))
 lbl_title.grid(row = 0, column = 0, columnspan = 3)
 
 lbl_chosen = Label(window, text = 'Image chosen', background = '#ffffff', foreground = '#000000', font = ('Calibri', 18))
@@ -59,9 +59,9 @@ update_status('Ready.')
 # Setting up images
 print('Setting up images...')
 img_chosen = Label(window, image = render_image(path = 'placeholder.png'), background = '#ffffff')
-img_chosen.grid(row = 2, column = 0, rowspan = 6)
+img_chosen.grid(row = 2, column = 0, rowspan = 7)
 img_processed = Label(window, image = render_image(path = 'placeholder.png'), background = '#ffffff')
-img_processed.grid(row = 2, column = 1, rowspan = 6)
+img_processed.grid(row = 2, column = 1, rowspan = 7)
 
 # LAB labels
 print('Creating LAB labels...')
@@ -69,6 +69,7 @@ string_l = StringVar()
 string_a = StringVar()
 string_b = StringVar()
 string_browning = StringVar()
+string_hue = StringVar()
 entry_l = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_l)
 entry_l.grid(row = 4, column = 2)
 entry_a = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_a)
@@ -77,6 +78,8 @@ entry_b = Entry(window, background = '#ffffff', foreground = '#000000', font = (
 entry_b.grid(row = 6, column = 2)
 entry_browning = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_browning)
 entry_browning.grid(row = 7, column = 2)
+entry_hue = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_hue)
+entry_hue.grid(row = 8, column = 2)
 
 def set_lab_values(lab):
     string_l.set('L* = ' + str(lab[0]))
@@ -85,9 +88,12 @@ def set_lab_values(lab):
     try:
         x = (lab[1] + 1.75 * lab[0]) / (5.645 * lab[0] + lab[1] - 0.3012 * lab[2])
         browning = (100 * (x - 0.31)) / 0.17
+        hue = atan(lab[2] - lab[1])
     except ZeroDivisionError:
         browning = 0
+        hue = 0
     string_browning.set('Browning Index = ' + str(browning))
+    string_hue.set('Hue Angle = ' + str(hue))
     window.update()
 
 set_lab_values([0.0, 0.0, 0.0])
@@ -175,7 +181,7 @@ def exit_img2lab():
     window.destroy()
 
 btn_exit = Button(window, text = 'Exit', command = exit_img2lab, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
-btn_exit.grid(row = 8, column = 2)
+btn_exit.grid(row = 9, column = 2)
 
 # Starting tkinter
 print('Starting tkinter...')
