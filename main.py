@@ -5,6 +5,19 @@ from skimage.color import rgb2lab, rgba2rgb
 from os.path import abspath, join
 from PIL import Image, ImageTk, ImageChops
 from math import atan
+from remove_bg import remove_bg
+
+
+# Create window
+print('Creating tkinter window...')
+window = Tk()
+window.title('CIELAB Values Calculator - img2lab')
+screen_width, screen_height = window.winfo_screenwidth(), window.winfo_screenheight()
+window.geometry("%dx%d" % (screen_width * 0.8, screen_height * 0.8))
+window.configure(background='#fafafa')
+window.update()
+img_size = (int(window.winfo_width() / 4), int(window.winfo_height() / 4))
+window.minsize(int(window.winfo_width() / 1.3), int(window.winfo_height() / 1.3))
 
 def render_image(path = '', image = 0):
     image_to_render = Image.new('1', img_size)
@@ -14,18 +27,6 @@ def render_image(path = '', image = 0):
         image_to_render = image
     image_to_render = image_to_render.resize(img_size, Image.ANTIALIAS)
     return ImageTk.PhotoImage(image_to_render)
-from remove_bg import remove_bg
-
-# Create window
-print('Creating tkinter window...')
-window = Tk()
-window.title('CIELAB Values Calculator - img2lab')
-screen_width, screen_height = window.winfo_screenwidth(), window.winfo_screenheight()
-window.geometry("%dx%d" % (screen_width * 0.8, screen_height * 0.8))
-window.configure(background='#ffffff')
-window.update()
-img_size = (int(window.winfo_width() / 3.5), int(window.winfo_height() / 3.5))
-
 
 # Configuring grid
 print('Configuring tkinter grids...')
@@ -38,15 +39,15 @@ for column in range(3):
 
 # Labels
 print('Creating labels...')
-lbl_title = Label(window, text = '  Convert image to CIELAB values (L*, a* and b*)  ', background = '#ffffff', foreground = '#000000', font = ('Calibri', 24))
+lbl_title = Label(window, text = '  Convert image to CIELAB values (L*, a* and b*)  ', background = '#fafafa', foreground = '#000000', font = ('Arial', 24))
 lbl_title.grid(row = 0, column = 0, columnspan = 3)
 
-lbl_chosen = Label(window, text = 'Image chosen', background = '#ffffff', foreground = '#000000', font = ('Calibri', 18))
+lbl_chosen = Label(window, text = 'Image chosen', background = '#fafafa', foreground = '#000000', font = ('Arial', 18))
 lbl_chosen.grid(row = 1, column = 0)
-lbl_processed = Label(window, text = 'Processed image', background = '#ffffff', foreground = '#000000', font = ('Calibri', 18))
+lbl_processed = Label(window, text = 'Processed image', background = '#fafafa', foreground = '#000000', font = ('Arial', 18))
 lbl_processed.grid(row = 1, column = 1)
 
-lbl_status = Label(window, text = 'Status:', background = '#ffffff', foreground = '#000000', font = ('Calibri', 11))
+lbl_status = Label(window, text = 'Status:', background = '#fafafa', foreground = '#000000', font = ('Arial', 11))
 lbl_status.grid(row = 1, column = 2)
 
 def update_status(msg):
@@ -58,9 +59,9 @@ update_status('Ready.')
 
 # Setting up images
 print('Setting up images...')
-img_chosen = Label(window, image = render_image(path = 'placeholder.png'), background = '#ffffff')
+img_chosen = Label(window, image = render_image(path = 'placeholder.png'), background = '#eeeeee', borderwidth = 2, relief = 'groove')
 img_chosen.grid(row = 2, column = 0, rowspan = 7)
-img_processed = Label(window, image = render_image(path = 'placeholder.png'), background = '#ffffff')
+img_processed = Label(window, image = render_image(path = 'placeholder.png'), background = '#eeeeee', borderwidth = 2, relief = 'groove')
 img_processed.grid(row = 2, column = 1, rowspan = 7)
 
 # LAB labels
@@ -70,15 +71,15 @@ string_a = StringVar()
 string_b = StringVar()
 string_browning = StringVar()
 string_hue = StringVar()
-entry_l = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_l)
+entry_l = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Arial', 11), textvariable = string_l)
 entry_l.grid(row = 4, column = 2)
-entry_a = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_a)
+entry_a = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Arial', 11), textvariable = string_a)
 entry_a.grid(row = 5, column = 2)
-entry_b = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_b)
+entry_b = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Arial', 11), textvariable = string_b)
 entry_b.grid(row = 6, column = 2)
-entry_browning = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_browning)
+entry_browning = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Arial', 11), textvariable = string_browning)
 entry_browning.grid(row = 7, column = 2)
-entry_hue = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12), textvariable = string_hue)
+entry_hue = Entry(window, background = '#ffffff', foreground = '#000000', font = ('Arial', 11), textvariable = string_hue)
 entry_hue.grid(row = 8, column = 2)
 
 def set_lab_values(lab):
@@ -102,7 +103,7 @@ set_lab_values([0.0, 0.0, 0.0])
 print('Creating buttons...')
 remove_img_bg = BooleanVar()
 remove_img_bg.set(False)
-check_remove_bg = Checkbutton(window, text = 'Remove background?', var = remove_img_bg, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
+check_remove_bg = Checkbutton(window, text = 'Remove background?', var = remove_img_bg, background = '#fafafa', foreground = '#000000', font = ('Arial', 12))
 check_remove_bg.grid(row = 2, column = 2)
 check_remove_bg.toggle()
 
@@ -173,15 +174,16 @@ def choose_file():
     update_status('Ready.')
     print()
 
-btn_submit = Button(window, text = 'Choose File', command = choose_file, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
+btn_submit = Button(window, text = 'Choose File', command = choose_file, background = '#eeeeee', foreground = '#000000', font = ('Arial', 12))
 btn_submit.grid(row = 3, column = 2)
 
 def exit_img2lab():
     update_status('Exiting img2lab...')
     window.destroy()
 
-btn_exit = Button(window, text = 'Exit', command = exit_img2lab, background = '#ffffff', foreground = '#000000', font = ('Calibri', 12))
+btn_exit = Button(window, text = 'Exit', command = exit_img2lab, background = '#eeeeee', foreground = '#000000', font = ('Arial', 12))
 btn_exit.grid(row = 9, column = 2)
+
 
 # Starting tkinter
 print('Starting tkinter...')
