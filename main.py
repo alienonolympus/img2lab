@@ -20,11 +20,9 @@ print('Creating tkinter window...')
 window = Tk()
 window.title('CIELAB Values Calculator - img2lab')
 screen_width, screen_height = window.winfo_screenwidth(), window.winfo_screenheight()
-#window.attributes('-fullscreen', True)
 window.geometry("%dx%d" % (screen_width * 0.8, screen_height * 0.8))
 window.configure(background='#ffffff')
 window.update()
-#img_size = (int(screen_width / 3.5), int(screen_width / 3.5))
 img_size = (int(window.winfo_width() / 3.5), int(window.winfo_height() / 3.5))
 
 
